@@ -1,3 +1,4 @@
+```go
 package main
 
 import (
@@ -32,18 +33,14 @@ func main() {
 		log.Fatal(err)
 	}
 	defer listener.Close()
+
+	fmt.Println("TCP Server listening on", config.GetEnv("TCP_SERVER"))
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Println("Read error:", err)
 			log.Fatal(err)
 		} 
-	 
-		if err != nil {
-			fmt.Println("Read error:", err)
-			continue
-		}
 		go categoryController.Handle(conn)
-		conn.Close()
 	}
 }
