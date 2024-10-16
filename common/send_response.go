@@ -2,38 +2,53 @@ package common
 
 import (
 	// "encoding/json"
+	"encoding/json"
 	"fmt"
-	"net"
+	// "net"
 )
 
-type BaseResponse struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
-	Total   int         `json:"total,omitempty"`
-	Error   bool        `json:"error"`
+type Response struct {
+	Disposed bool        `json:"isDisposed"`
+	ID       string      `json:"id"`
+	Response     interface{} `json:"response"`
+	Err      interface{} `json:"err"` // Can be nil or other types
+}
+type DataResponse struct {
+	Data   interface{} `json:"data"`
+	Code   int         `json:"code"`
+	ErrMsg string      `json:"message"`
+	Error  interface{} `json:"error"`
 }
 
-func SendResponse(conn net.Conn, code int, message string, data interface{}, total int, error bool) {
-	response := BaseResponse{
-		Code:    code,
-		Message: message,
-		Data:    data,
-		Total:   total,
-		Error:   error,
-	}
-	fmt.Println(response)
-	// response := models.NewBaseResponse(code, message, data, total, error)
-	// respJSON, err := json.Marshal(response)
-	// if err != nil {
-	// 	// Handle marshaling error, you might want to send an error response back here
-	// 	conn.Write([]byte(`{"code": 500, "message": "Internal Server Error", "error": true}`))
-	// 	return
-	// }
-	// conn.Write(response)
-	// conn.Write([]byte("\n"))
-	_ , err := conn.Write([]byte(`{"code": 500, "message": "Internal Server Error123", "error": true}`))
+// func to convert the struct to a JSON string
+func ConvertToString(response Response) (string, error) {
+	// Use json.Marshal to convert struct to JSON string
+	jsonBytes, err := json.Marshal(response)
 	if err != nil {
-		fmt.Printf("hasserrr in response %v",err)
-	}	
+		return "", err
+	}
+	// Get the length of jsonBytes
+	jsonLength := len(jsonBytes)
+	// Return the JSON string
+	return fmt.Sprintf("%v#%v", jsonLength, string(jsonBytes)), nil
+}
+func SendResponse(request *TcpRequest, code int, data interface{}, message string, err bool) {
+	responseData := DataResponse{
+		Data:   data,
+		Code:   code,
+		ErrMsg: message,
+		Error:  err,
+	}
+	response := Response{
+		ID:       request.ID,
+		Disposed: true,
+		Response:  responseData,
+		Err:      nil,
+	}
+	res,_ := ConvertToString(response)
+	fmt.Println(res)
+	_, writeErr := request.conn.Write([]byte(res))
+	if writeErr != nil {
+		return
+	}
 }

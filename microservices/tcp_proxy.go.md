@@ -1,31 +1,28 @@
-```go
-package main
+package microservices
 
 import (
 	"bakend-settings/common"
-	"bakend-settings/config"
 	"fmt"
-	"log"
 	"net"
 	// "time"
 )
 
-type Server struct {
+type TcpServer struct {
 	listenAddr string
 	ln         net.Listener
 	quitch     chan struct{}
 	msgch      chan []byte
 }
 
-func NewServer(listenAddr string) *Server {
-	return &Server{
+func NewTcpServer(listenAddr string) *TcpServer {
+	return &TcpServer{
 		listenAddr: listenAddr,
 		quitch:     make(chan struct{}),
 		msgch:      make(chan []byte, 10),
 	}
 }
 
-func (s *Server) Start() error {
+func (s *TcpServer) Start() error {
 	ln, err := net.Listen("tcp", s.listenAddr)
 	if err != nil {
 		return err
@@ -42,7 +39,7 @@ func (s *Server) Start() error {
 	return nil
 }
 
-func (s *Server) acceptLoop() {
+func (s *TcpServer) acceptLoop() {
 	for {
 		conn, err := s.ln.Accept()
 		if err != nil {
@@ -53,7 +50,7 @@ func (s *Server) acceptLoop() {
 	}
 }
 
-func (s *Server) readLoop(conn net.Conn) {
+func (s *TcpServer) readLoop(conn net.Conn) {
 	defer conn.Close()
 	buf := make([]byte, 2048)
 
@@ -97,9 +94,9 @@ func (s *Server) readLoop(conn net.Conn) {
 	}
 }
 
-func main() {
-	config.LoadEnv()
-	fmt.Printf("server is running on %v\n", config.GetEnv("TCP_SERVER"))
-	server := NewServer(config.GetEnv("TCP_SERVER"))
-	log.Fatal(server.Start())
-}
+// func main() {
+// 	config.LoadEnv()
+// 	fmt.Printf("server is running on %v\n", config.GetEnv("TCP_SERVER"))
+// 	server := NewServer(config.GetEnv("TCP_SERVER"))
+// 	log.Fatal(server.Start())
+// }
