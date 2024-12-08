@@ -2,8 +2,9 @@ package services
 
 import (
 	"context"
+	"log"
 
-	"bakend-settings/models"
+	"bakend-settings/category/models"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -43,6 +44,7 @@ func (s *CategoryService) List(ctx context.Context) ([]models.Category, error) {
 	var categories []models.Category
 	cursor, err := s.collection.Find(ctx, bson.M{})
 	if err != nil {
+		log.Println("Error finding categories:", err)
 		return nil, err
 	}
 	defer cursor.Close(ctx)

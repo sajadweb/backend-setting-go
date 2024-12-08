@@ -6,8 +6,8 @@ import (
 	"log"
 	"testing"
 
-	"bakend-settings/models"
-	"bakend-settings/services"
+	"bakend-settings/category/models"
+	"bakend-settings/category/services"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
